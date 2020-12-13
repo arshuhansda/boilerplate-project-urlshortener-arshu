@@ -53,11 +53,9 @@ const URL = mongoose.model('URL', urlSchema);
 app.post('/api/shorturl/new', async function(req, res) {
   const url = req.body.url;
   //console.log(url);
-  const urlCode = shortId.generate();
-
   if(!validUrl.isWebUri(url)) {
     res.status(401).json({
-      error: "invalid URL"
+      error: 'invalid url'
     })
   }
   else {
@@ -71,7 +69,7 @@ app.post('/api/shorturl/new', async function(req, res) {
           short_url: findOne.short_url
         })
       } else {
-
+        var urlCode = shortId.generate()
         findOne = new URL({
           original_url: url,
           short_url: urlCode
@@ -93,12 +91,28 @@ app.post('/api/shorturl/new', async function(req, res) {
 
 app.get('/api/shorturl/:short_url?', async function (req,res) {
   try {
-    const urlParams = await URL.findOne({
-      short_url: req.params.short_url
+    //console.log(req.params.short_url);
+
+    let findOne = await URL.findOne({
+          short_url: req.params.short_url
     })
+    if(findOne) {
+      /*res.json({
+        original_url: findOne.original_url,
+        short_url: findOne.short_url
+      })*/
+
+      res.redirect(findOne.original_url)
+    }
+    else {
+      res.redirect('https://www.freecodecamp.org/')
+    }
+
   } catch (err) {
     console.error(err)
-    res.status(500).json("server error.")
+    res.status(500).json({
+      error: 'invalid URL'
+    })
   }
 });
 
